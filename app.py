@@ -4,6 +4,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 from datetime import datetime
 import os
+import pytz
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(page_title="Sistema Águia - Produção", page_icon="🦅", layout="centered")
@@ -166,10 +167,13 @@ if btn_salvar:
             aba = conectar_google_sheets()
             if aba:
                 # Dados organizados conforme as colunas A até H da sua planilha
+                fuso_brasilia = pytz.timezone('America/Sao_Paulo')
+                agora_brasilia = datetime.now(fuso_brasilia)
+                
                 nova_linha = [
                     mes, dia, total_prod, falha_voadora, 
                     falha_garra, tipo_longarina, observacoes, inspetor,
-                    datetime.now().strftime("%d/%m/%Y %H:%M:%S"), # Timestamp
+                    agora_brasilia.strftime("%d/%m/%Y %H:%M:%S"), # Agora com fuso correto
                 ]
                 
                 try:
@@ -179,3 +183,4 @@ if btn_salvar:
                     st.balloons()
                 except Exception as e:
                     st.error(f"Erro ao salvar na planilha: {e}")
+# atualização fuso

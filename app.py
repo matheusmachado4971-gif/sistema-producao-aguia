@@ -170,10 +170,13 @@ if btn_salvar:
                 fuso_brasilia = pytz.timezone('America/Sao_Paulo')
                 agora_brasilia = datetime.now(fuso_brasilia)
                 
+                data_registro = agora_brasilia.strftime("%d/%m/%Y")
+                hora_registro = agora_brasilia.strftime("%H:%M:%S")
+
                 nova_linha = [
                     mes, dia, total_prod, falha_voadora, 
-                    falha_garra, tipo_longarina, observacoes, inspetor,
-                    agora_brasilia.strftime("%d/%m/%Y %H:%M:%S"), # Agora com fuso correto
+                    falha_garra, tipo_longarina, observacoes, inspetor, data_registro,
+                    hora_registro,
                 ]
                 
                 try:

@@ -131,6 +131,32 @@ st.divider()
 # --- BORDA DO FORMULÁRIO ---
 st.markdown('<div class="borda-formulario">', unsafe_allow_html=True)
 
+def buscar_opcoes_longarina():
+    try:
+        # Puxa as credenciais e abre a planilha
+        creds_info = st.secrets["gcp_service_account"]
+        scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
+        creds = Credentials.from_service_account_info(creds_info, scopes=scope)
+        client = gspread.authorize(creds)
+        
+        # Abre a planilha pelo ID
+        id_planilha = "11LPXBE0bg5VXZbiHpXKiQmw9wASJFg-NhhU4cI5K40U"
+        spreadsheet = client.open_by_key(id_planilha)
+        
+        # Seleciona a aba pelo NOME exato
+        aba_config = spreadsheet.worksheet("Página2")
+        
+        # Puxa todos os valores da Coluna A (Coluna 1)
+        coluna_a = aba_config.col_values(1)
+        
+        # Remove o cabeçalho (primeira linha) e ignora células vazias
+        opcoes = [item for item in coluna_a[1:] if item.strip()]
+        
+        return opcoes if opcoes else ["Nenhum tipo encontrado"]
+    except Exception as e:
+        st.error(f"Erro ao buscar tipos na Página2: {e}")
+        return ["Erro ao carregar lista"]
+
 # --- FORMULÁRIO DE ENTRADA ---
 with st.form("form_producao", clear_on_submit=True):
     st.subheader("Lançamento de Dados")
@@ -140,7 +166,13 @@ with st.form("form_producao", clear_on_submit=True):
         mes = st.selectbox("Mês", ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", 
                                    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"])
         dia = st.number_input("Dia", min_value=1, max_value=31, step=1)
-        tipo_longarina = st.selectbox("Tipo de Longarina", ["Padrão", "Especial", "Reforçada"])
+
+        
+        # 1. Busca os tipos que já foram digitados antes na planilha
+        tipos_cadastrados = buscar_opcoes_longarina()
+        
+        # 2. Cria o selectbox com esses dados
+        tipo_longarina = st.selectbox("Tipo de Longarina", tipos_cadastrados)
         
     with c2:
         total_prod = st.number_input("Total Prod.", min_value=0, step=1)
